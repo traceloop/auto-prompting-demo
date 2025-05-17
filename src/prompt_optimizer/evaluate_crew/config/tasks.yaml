@@ -1,0 +1,7 @@
+evaluate_task:
+  description: >
+    You are given the following prompt: {prompt}.
+    Evaluate the prompt and provide back the main failure reasons.
+  expected_output: >
+    An explanation of the main failure reasons.
+  agent: evaluator

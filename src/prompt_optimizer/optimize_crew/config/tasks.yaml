@@ -1,0 +1,21 @@
+research_task:
+  description: >
+    Our prompt isn't working well due to the following feedback: {feedback}.
+    Help us find the right techniques to improve it.
+  expected_output: >
+    A list of 5 tips on how to improve a prompt.
+  agent: researcher
+
+improve_prompt_task:
+  description: >
+    You are given the following prompt: {prompt}.
+    Last time we ran it we got the following feedback: {feedback}.
+    Update the prompt to improve the quality of the response.
+    Make sure to follow the latest and greatest research in the area.
+    The updated prompt you provide will be sent as-is,
+    so assume no extra context from past conversations is available.
+  expected_output: >
+    A templated string representing the updated prompt.
+  agent: prompt_engineer
+  context:
+    - research_task

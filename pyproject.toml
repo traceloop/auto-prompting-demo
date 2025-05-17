@@ -1,0 +1,30 @@
+[project]
+name = "prompt_optimizer"
+version = "0.1.0"
+description = "prompt-optimizer using crewAI"
+authors = [{ name = "Your Name", email = "you@example.com" }]
+requires-python = ">=3.10,<3.13"
+dependencies = [
+    "crewai[tools]>=0.119.0,<1.0.0",
+    "docling>=2.31.0",
+    "llama-index>=0.12.35",
+    "llama-index-readers-github>=0.6.1",
+    "llama-index-vector-stores-chroma>=0.4.1",
+    "openai>=1.75.0",
+    "python-dotenv>=1.1.0",
+    "traceloop-sdk>=0.40.4",
+]
+
+[project.scripts]
+prompt_optimizer = "prompt_optimizer.main:run"
+kickoff = "prompt_optimizer.main:kickoff"
+plot = "prompt_optimizer.main:plot"
+load_data = "prompt_optimizer.rag:load_data"
+rag = "prompt_optimizer.runner:run"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.crewai]
+type = "crew"
