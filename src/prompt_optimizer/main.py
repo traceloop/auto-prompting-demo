@@ -50,7 +50,7 @@ class PromptOptimizationFlow(Flow[PromptOptimizationFlowState]):
 
     @router(evaluate_prompt)
     def optimize_prompt(self):
-        if self.state.retry_count > 1:
+        if self.state.score > 0.8:
             return "complete"
 
         if self.state.retry_count > 3:
@@ -61,7 +61,11 @@ class PromptOptimizationFlow(Flow[PromptOptimizationFlowState]):
             PromptOptimizer()
             .crew()
             .kickoff(
-                inputs={"prompt": self.state.prompt, "feedback": self.state.feedback}
+                inputs={
+                    "prompt": self.state.prompt,
+                    "feedback": self.state.feedback,
+                    "score": self.state.score,
+                }
             )
         )
 

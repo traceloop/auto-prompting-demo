@@ -9,11 +9,14 @@ research_task:
 improve_prompt_task:
   description: >
     You are given the following prompt: {prompt}.
-    Last time we ran it we got the following feedback: {feedback}.
+    We evaluated it and got the following score: {score}.
+    With the following feedback: {feedback}.
     Update the prompt to improve the quality of the response.
-    Make sure to follow the latest and greatest research in the area.
+    Make sure to follow the tips that were provided.
     The updated prompt you provide will be sent as-is,
     so assume no extra context from past conversations is available.
+    Make sure not to overfit to the specific feedback.
+    Do not change the templated variables marked with {}.
   expected_output: >
     A templated string representing the updated prompt.
   agent: prompt_engineer

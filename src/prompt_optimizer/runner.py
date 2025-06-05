@@ -9,7 +9,7 @@ from rich.console import Console
 client = OpenAI()
 console = Console()
 
-MAX_EVALUATION_EXAMPLES: Optional[int] = 2
+MAX_EVALUATION_EXAMPLES: Optional[int] = None  #
 
 evaluation_items = [
     {

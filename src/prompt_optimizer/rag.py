@@ -13,7 +13,8 @@ from llama_index.readers.github import GithubRepositoryReader, GithubClient
 from dotenv import load_dotenv
 
 from traceloop.sdk import Traceloop
-from traceloop.sdk.decorators import task, workflow
+
+# from traceloop.sdk.decorators import task, workflow
 
 from pydantic import BaseModel
 
@@ -22,7 +23,7 @@ load_dotenv()
 QA_PROMPT_KEY = "response_synthesizer:text_qa_template"
 
 
-Traceloop.init()
+# Traceloop.init()
 
 Settings.embed_model = OpenAIEmbedding(model="text-embedding-3-small")
 
@@ -45,7 +46,7 @@ index = VectorStoreIndex.from_vector_store(
 )
 
 
-@task()
+# @task()
 def rephrase_as_query(question: str):
     response = client.chat.completions.create(
         model="gpt-4o",
@@ -59,7 +60,7 @@ def rephrase_as_query(question: str):
     return response.choices[0].message.content
 
 
-@workflow()
+# @workflow()
 def query_rag(prompt_template: str, question: str):
     results = traceloop_docs.query(
         query_texts=[rephrase_as_query(question)], n_results=5
@@ -95,3 +96,17 @@ def load_data():
     storage_context = StorageContext.from_defaults(vector_store=vector_store)
     index = VectorStoreIndex.from_documents(docs, storage_context=storage_context)
     index.storage_context.persist()
+
+
+def run():
+    prompt_template = """Answer the following question based on the provided context:
+Context:
+{context}
+
+Question:
+{question}"""
+
+    question = input("Enter your question: ")
+    result = query_rag(prompt_template, question)
+    print("\nAnswer:")
+    print(result)

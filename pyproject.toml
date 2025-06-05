@@ -20,7 +20,8 @@ prompt_optimizer = "prompt_optimizer.main:run"
 kickoff = "prompt_optimizer.main:kickoff"
 plot = "prompt_optimizer.main:plot"
 load_data = "prompt_optimizer.rag:load_data"
-rag = "prompt_optimizer.runner:run"
+evaluate = "prompt_optimizer.runner:run"
+rag = "prompt_optimizer.rag:run"
 
 [build-system]
 requires = ["hatchling"]
