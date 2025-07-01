@@ -4,6 +4,7 @@ from crewai.agents.agent_builder.base_agent import BaseAgent
 from typing import List
 from pydantic import BaseModel, Field
 from prompt_optimizer.tools.run_prompt import RunPrompt
+from prompt_optimizer.tracing import tracer_instance
 
 
 class EvaluationResult(BaseModel):
