@@ -3,6 +3,7 @@ from crewai.project import CrewBase, agent, crew, task
 from crewai.agents.agent_builder.base_agent import BaseAgent
 from crewai.knowledge.source.crew_docling_source import CrewDoclingSource
 from typing import List
+from prompt_optimizer.tracing import tracer_instance
 
 
 @CrewBase

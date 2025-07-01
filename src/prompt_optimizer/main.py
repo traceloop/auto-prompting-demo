@@ -8,6 +8,7 @@ from prompt_optimizer.evaluate_crew.evaluate_crew import (
     EvaluationResult,
 )
 from prompt_optimizer.optimize_crew.optimize_crew import PromptOptimizer
+from prompt_optimizer.tracing import tracer_instance
 
 
 START_PROMPT = """Answer the following question based on the provided context:
@@ -30,49 +31,70 @@ class PromptOptimizationFlow(Flow[PromptOptimizationFlowState]):
 
     @start("retry")
     def evaluate_prompt(self):
-        print("Evaluating prompt")
-        result: EvaluationResult = (
-            PromptEvaluator().crew().kickoff(inputs={"prompt": self.state.prompt})
-        ).pydantic
-        self.state.score = result.score
-        self.state.valid = not result.failure_reasons
-        self.state.feedback = result.failure_reasons
+        with tracer_instance.start_as_current_span("evaluate_prompt") as span:
+            print("Evaluating prompt")
+            span.set_attribute("prompt", self.state.prompt)
+            span.set_attribute("retry_count", self.state.retry_count)
+            
+            result: EvaluationResult = (
+                PromptEvaluator().crew().kickoff(inputs={"prompt": self.state.prompt})
+            ).pydantic
+            
+            self.state.score = result.score
+            self.state.valid = not result.failure_reasons
+            self.state.feedback = result.failure_reasons
 
-        print(f"Evaluation results:")
-        print(f"Score: {self.state.score:.2f}")
-        if result.failure_reasons:
-            print("\nFailure reasons:")
-            print(result.failure_reasons)
+            span.set_attribute("score", self.state.score)
+            span.set_attribute("valid", self.state.valid)
+            if result.failure_reasons:
+                span.set_attribute("failure_reasons", result.failure_reasons)
 
-        self.state.retry_count += 1
+            print(f"Evaluation results:")
+            print(f"Score: {self.state.score:.2f}")
+            if result.failure_reasons:
+                print("\nFailure reasons:")
+                print(result.failure_reasons)
 
-        return "optimize"
+            self.state.retry_count += 1
+
+            return "optimize"
 
     @router(evaluate_prompt)
     def optimize_prompt(self):
-        if self.state.score > 0.8:
-            return "complete"
+        with tracer_instance.start_as_current_span("optimize_prompt") as span:
+            span.set_attribute("current_score", self.state.score)
+            span.set_attribute("retry_count", self.state.retry_count)
+            
+            if self.state.score > 0.8:
+                span.set_attribute("optimization_result", "complete")
+                return "complete"
 
-        if self.state.retry_count > 3:
-            return "max_retry_exceeded"
+            if self.state.retry_count > 3:
+                span.set_attribute("optimization_result", "max_retry_exceeded")
+                return "max_retry_exceeded"
 
-        print("Optimizing prompt")
-        result = (
-            PromptOptimizer()
-            .crew()
-            .kickoff(
-                inputs={
-                    "prompt": self.state.prompt,
-                    "feedback": self.state.feedback,
-                    "score": self.state.score,
-                }
+            print("Optimizing prompt")
+            span.set_attribute("original_prompt", self.state.prompt)
+            span.set_attribute("feedback", self.state.feedback or "")
+            
+            result = (
+                PromptOptimizer()
+                .crew()
+                .kickoff(
+                    inputs={
+                        "prompt": self.state.prompt,
+                        "feedback": self.state.feedback,
+                        "score": self.state.score,
+                    }
+                )
             )
-        )
 
-        print("Optimized prompt:", result.raw)
-        self.state.prompt = result.raw
+            print("Optimized prompt:", result.raw)
+            span.set_attribute("optimized_prompt", result.raw)
+            span.set_attribute("optimization_result", "retry")
+            self.state.prompt = result.raw
 
-        return "retry"
+            return "retry"
 
     @listen("complete")
     def save_result(self):
@@ -95,8 +117,10 @@ class PromptOptimizationFlow(Flow[PromptOptimizationFlowState]):
 
 
 def kickoff():
-    prompt_flow = PromptOptimizationFlow()
-    prompt_flow.kickoff()
+    with tracer_instance.start_as_current_span("prompt_optimization_flow") as span:
+        span.set_attribute("operation", "kickoff")
+        prompt_flow = PromptOptimizationFlow()
+        prompt_flow.kickoff()
 
 
 def plot():

@@ -13,6 +13,7 @@ dependencies = [
     "openai>=1.75.0",
     "python-dotenv>=1.1.0",
     "traceloop-sdk>=0.40.4",
+    "openllmetry>=0.27.0",
 ]
 
 [project.scripts]
